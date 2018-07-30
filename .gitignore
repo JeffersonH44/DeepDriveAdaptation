@@ -1,0 +1,9 @@
+
+*/.vs/
+*/Build
+*/Binaries
+*/Intermediate
+*/Saved
+*/DerivedDataCache
+*_BuildData.uasset
+BuildingEscape/Content/StarterContent/
