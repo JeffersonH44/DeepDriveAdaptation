@@ -3,8 +3,9 @@
 #pragma once
 
 #include "Engine/TriggerVolume.h"
-#include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GenericPlatform/GenericPlatformMath.h"
+#include "CoreMinimal.h"
 #include "OpenDoor.generated.h"
 
 
@@ -22,6 +23,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	void OpenDoor();
+	void CloseDoor();
 
 public:	
 	// Called every frame
@@ -35,5 +37,11 @@ private:
 	ATriggerVolume* PressurePlate;
 	
 	UPROPERTY(EditAnywhere)
+	float DelayTimeToClose;
+
+	float LastTimeOpen;
+	float CloseYaw;
+
 	AActor* ActorThatOpens;
+	AActor* Owner;
 };
