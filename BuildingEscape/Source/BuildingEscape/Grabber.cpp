@@ -56,11 +56,24 @@ void UGrabber::FindPhysicsHandleComponent()
 
 void UGrabber::Grab() {
 	UE_LOG(LogTemp, Warning, TEXT("grabbing..."))
-	GetFirstPhysicsBodyInReach();
+	auto HitComponent = GetFirstPhysicsBodyInReach();
+	auto ComponentToGrab = HitComponent.GetComponent();
+	auto ActorHit = HitComponent.GetActor();
+
+	if (ActorHit) 
+	{
+		PhysicsHandler->GrabComponentAtLocationWithRotation(
+			ComponentToGrab,
+			NAME_None,
+			ComponentToGrab->GetOwner()->GetActorLocation(),
+			ComponentToGrab->GetOwner()->GetActorRotation()
+		);
+	}
 }
 
 void UGrabber::Release() {
 	UE_LOG(LogTemp, Warning, TEXT("Release..."))
+	PhysicsHandler->ReleaseComponent();
 }
 
 
@@ -68,10 +81,7 @@ void UGrabber::Release() {
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
 
-void UGrabber::GetFirstPhysicsBodyInReach()
-{
 	FVector PlayerViewpointLocation;
 	FRotator PlayerViewpointRotation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
@@ -82,16 +92,23 @@ void UGrabber::GetFirstPhysicsBodyInReach()
 	FVector rotationVector = PlayerViewpointRotation.Vector();
 	FVector LineTraceEnd = PlayerViewpointLocation + rotationVector * Reach;
 
-	DrawDebugLine(
-		GetWorld(),
-		PlayerViewpointLocation,
-		LineTraceEnd,
-		FColor(255, 0, 0),
-		false,
-		0.f,
-		0.f,
-		10.f
+	if (PhysicsHandler->GrabbedComponent) 
+	{
+		PhysicsHandler->SetTargetLocation(LineTraceEnd);
+	}
+}
+
+FHitResult UGrabber::GetFirstPhysicsBodyInReach()
+{
+	FVector PlayerViewpointLocation;
+	FRotator PlayerViewpointRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT PlayerViewpointLocation,
+		OUT PlayerViewpointRotation
 	);
+
+	FVector rotationVector = PlayerViewpointRotation.Vector();
+	FVector LineTraceEnd = PlayerViewpointLocation + rotationVector * Reach;
 
 	/// Setup query parameters
 	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner());
@@ -114,5 +131,7 @@ void UGrabber::GetFirstPhysicsBodyInReach()
 			*(currentActor->GetName())
 		)
 	}
+
+	return LineTraceHit;
 }
 

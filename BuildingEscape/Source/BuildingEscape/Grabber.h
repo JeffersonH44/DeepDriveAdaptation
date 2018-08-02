@@ -40,5 +40,5 @@ private:
 	// Setup (assumed) attached input component
 	void SetupInputComponent();
 
-	void GetFirstPhysicsBodyInReach();
+	FHitResult GetFirstPhysicsBodyInReach();
 };
