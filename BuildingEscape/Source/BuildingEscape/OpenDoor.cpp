@@ -21,6 +21,11 @@ void UOpenDoor::BeginPlay()
 	Owner = GetOwner();
 	LastTimeOpen = -this->DelayTimeToClose - 1.0f;
 
+	if (!PressurePlate) 
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s missing pressure plate component"), *GetOwner()->GetName())
+	}
+
 	// obtain close yaw
 	this->CloseYaw = Owner->GetActorRotation().Yaw;
 }
@@ -58,6 +63,9 @@ float UOpenDoor::GetTotalMassOfActorsInPlate()
 	float TotalMass = 0.f;
 	TArray<AActor*> OverlappingActors;
 	// Find overlapping actors
+	if (!PressurePlate) {
+		return 0.0;
+	}
 	PressurePlate->GetOverlappingActors(OUT OverlappingActors);
 
 	// add all the masses

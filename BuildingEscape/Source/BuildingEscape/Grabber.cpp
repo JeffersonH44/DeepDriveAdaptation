@@ -29,7 +29,6 @@ void UGrabber::SetupInputComponent()
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InputComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Input component found"))
 		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
 		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
 	}
@@ -42,11 +41,7 @@ void UGrabber::SetupInputComponent()
 void UGrabber::FindPhysicsHandleComponent()
 {
 	PhysicsHandler = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandler)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Handle component found"))
-	}
-	else
+	if (!PhysicsHandler)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s missing physics handle component"), *(GetOwner()->GetName()))
 	}
@@ -61,6 +56,7 @@ void UGrabber::Grab() {
 	{
 		/// Get the component that we want to grab
 		auto ComponentToGrab = HitComponent.GetComponent();
+		if (!PhysicsHandler) return;
 		PhysicsHandler->GrabComponentAtLocationWithRotation(
 			ComponentToGrab,
 			NAME_None,
@@ -71,7 +67,7 @@ void UGrabber::Grab() {
 }
 
 void UGrabber::Release() {
-	UE_LOG(LogTemp, Warning, TEXT("Release..."))
+	if (!PhysicsHandler) return;
 	PhysicsHandler->ReleaseComponent();
 }
 
@@ -80,6 +76,7 @@ void UGrabber::Release() {
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (!PhysicsHandler) return;
 
 	if (PhysicsHandler->GrabbedComponent) 
 	{
