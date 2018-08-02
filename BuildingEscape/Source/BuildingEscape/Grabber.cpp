@@ -11,8 +11,6 @@ UGrabber::UGrabber()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -32,7 +30,7 @@ void UGrabber::SetupInputComponent()
 	if (InputComponent)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Input component found"))
-			InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
 		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
 	}
 	else
@@ -57,11 +55,12 @@ void UGrabber::FindPhysicsHandleComponent()
 void UGrabber::Grab() {
 	UE_LOG(LogTemp, Warning, TEXT("grabbing..."))
 	auto HitComponent = GetFirstPhysicsBodyInReach();
-	auto ComponentToGrab = HitComponent.GetComponent();
-	auto ActorHit = HitComponent.GetActor();
 
+	auto ActorHit = HitComponent.GetActor();
 	if (ActorHit) 
 	{
+		/// Get the component that we want to grab
+		auto ComponentToGrab = HitComponent.GetComponent();
 		PhysicsHandler->GrabComponentAtLocationWithRotation(
 			ComponentToGrab,
 			NAME_None,
@@ -82,33 +81,16 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FVector PlayerViewpointLocation;
-	FRotator PlayerViewpointRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewpointLocation,
-		OUT PlayerViewpointRotation
-	);
-
-	FVector rotationVector = PlayerViewpointRotation.Vector();
-	FVector LineTraceEnd = PlayerViewpointLocation + rotationVector * Reach;
-
 	if (PhysicsHandler->GrabbedComponent) 
 	{
-		PhysicsHandler->SetTargetLocation(LineTraceEnd);
+		auto LineTraceVectors = GetLineTraceVector();
+		PhysicsHandler->SetTargetLocation(LineTraceVectors.v2); // viewpoint end as a new target location for the grabbed object
 	}
 }
 
 FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 {
-	FVector PlayerViewpointLocation;
-	FRotator PlayerViewpointRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewpointLocation,
-		OUT PlayerViewpointRotation
-	);
-
-	FVector rotationVector = PlayerViewpointRotation.Vector();
-	FVector LineTraceEnd = PlayerViewpointLocation + rotationVector * Reach;
+	auto LineTraceVectors = GetLineTraceVector();
 
 	/// Setup query parameters
 	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner());
@@ -117,8 +99,8 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 	FHitResult LineTraceHit;
 	GetWorld()->LineTraceSingleByObjectType(
 		OUT LineTraceHit,
-		PlayerViewpointLocation,
-		LineTraceEnd,
+		LineTraceVectors.v1, // start
+		LineTraceVectors.v2, // end
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParameters
 	);
@@ -133,5 +115,19 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 	}
 
 	return LineTraceHit;
+}
+// Get line trace vectors from the viewpoint given a Radius (Reach)
+FTwoVectors UGrabber::GetLineTraceVector()
+{
+	FVector StartLocation;
+	FRotator PlayerViewpointRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT StartLocation,
+		OUT PlayerViewpointRotation
+	);
+
+	FVector RotationVector = PlayerViewpointRotation.Vector();
+	FVector EndLocation = StartLocation + RotationVector * Reach;
+	return FTwoVectors(StartLocation, EndLocation);
 }
 
