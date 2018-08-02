@@ -4,6 +4,7 @@
 
 #include "Engine/TriggerVolume.h"
 #include "Components/ActorComponent.h"
+#include "Containers/Array.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 #include "CoreMinimal.h"
 #include "OpenDoor.generated.h"
@@ -39,9 +40,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	float DelayTimeToClose;
 
+	UPROPERTY(EditAnywhere)
+	float MassThreshold = 50.f;
+
+
 	float LastTimeOpen;
 	float CloseYaw;
 
-	AActor* ActorThatOpens;
 	AActor* Owner;
+
+	float GetTotalMassOfActorsInPlate();
 };
