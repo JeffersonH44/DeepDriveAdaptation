@@ -19,7 +19,7 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 	Owner = GetOwner();
-	LastTimeOpen = -this->DelayTimeToClose - 1.0f;
+	// LastTimeOpen = -this->DelayTimeToClose - 1.0f;
 
 	if (!PressurePlate) 
 	{
@@ -30,31 +30,19 @@ void UOpenDoor::BeginPlay()
 	this->CloseYaw = Owner->GetActorRotation().Yaw;
 }
 
-void UOpenDoor::OpenDoor()
-{
-	Owner->SetActorRotation(FRotator(0.0f, this->DoorAngle, 0.0f));
-}
-
-void UOpenDoor::CloseDoor()
-{
-	Owner->SetActorRotation(FRotator(0.0f, this->CloseYaw, 0.0f));
-}
-
 // Called every frame
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	float currentTime = GetWorld()->GetTimeSeconds();
-
 	if (GetTotalMassOfActorsInPlate() > MassThreshold) 
 	{
-		OpenDoor();
-		LastTimeOpen = currentTime;
+		OnOpen.Broadcast();
+		// LastTimeOpen = currentTime;
 	}
-	else if(FGenericPlatformMath::Abs(currentTime - LastTimeOpen) > this->DelayTimeToClose)
+	else
 	{
-		CloseDoor();
+		OnClose.Broadcast();
 	}
 }
 
