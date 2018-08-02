@@ -20,9 +20,47 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Warning, TEXT("Grabber reporting for duty!"))
-	// ...
+	/// Look for attached Physics Handle
+	FindPhysicsHandleComponent();
+	SetupInputComponent();
 	
+}
+
+void UGrabber::SetupInputComponent()
+{
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (InputComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Input component found"))
+			InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s missing Input component"), *(GetOwner()->GetName()))
+	}
+}
+
+void UGrabber::FindPhysicsHandleComponent()
+{
+	PhysicsHandler = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandler)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Handle component found"))
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s missing physics handle component"), *(GetOwner()->GetName()))
+	}
+}
+
+void UGrabber::Grab() {
+	UE_LOG(LogTemp, Warning, TEXT("grabbing..."))
+	GetFirstPhysicsBodyInReach();
+}
+
+void UGrabber::Release() {
+	UE_LOG(LogTemp, Warning, TEXT("Release..."))
 }
 
 
@@ -30,11 +68,14 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
 
+void UGrabber::GetFirstPhysicsBodyInReach()
+{
 	FVector PlayerViewpointLocation;
 	FRotator PlayerViewpointRotation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewpointLocation, 
+		OUT PlayerViewpointLocation,
 		OUT PlayerViewpointRotation
 	);
 
@@ -67,13 +108,11 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	AActor* currentActor = LineTraceHit.GetActor();
 
-	if (currentActor) 
+	if (currentActor)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Line trace hit: %s"),
 			*(currentActor->GetName())
 		)
 	}
-
-	
 }
 

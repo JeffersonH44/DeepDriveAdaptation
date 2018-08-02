@@ -2,8 +2,10 @@
 
 #pragma once
 
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/InputComponent.h"
 #include "Engine/World.h"
 #include "Grabber.generated.h"
 
@@ -27,6 +29,16 @@ public:
 	
 private:
 	float Reach = 100.f;
-		
-	
+	UPhysicsHandleComponent* PhysicsHandler = nullptr;
+	UInputComponent* InputComponent = nullptr;
+
+	void Grab();
+	void Release();
+
+	// Find (assumed) attached physics handle
+	void FindPhysicsHandleComponent();
+	// Setup (assumed) attached input component
+	void SetupInputComponent();
+
+	void GetFirstPhysicsBodyInReach();
 };
