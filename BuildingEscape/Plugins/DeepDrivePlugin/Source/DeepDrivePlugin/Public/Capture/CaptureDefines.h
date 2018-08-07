@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Engine.h"
+#include "CoreMinimal.h"
 
 UENUM(BlueprintType)
 enum class EDeepDriveCameraType : uint8

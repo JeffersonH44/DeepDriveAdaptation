@@ -60,5 +60,8 @@ public class DeepDrivePlugin : ModuleRules
 			Definitions.Add("DEEPDRIVE_PLATFORM_LINUX=1");
 
         Definitions.Add("DEEPDRIVE_WITH_UE4_LOGGING");
+
+        // for more information about allowing exceptions: https://answers.unrealengine.com/questions/348151/c4577-noexcept-used-with-no-exception-handling-mod.html
+        bEnableExceptions = true;
     }
 }
