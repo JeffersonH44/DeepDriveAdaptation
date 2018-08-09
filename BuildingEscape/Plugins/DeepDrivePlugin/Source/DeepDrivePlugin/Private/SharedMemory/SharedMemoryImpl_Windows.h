@@ -5,7 +5,9 @@
 
 #include "Private/SharedMemory/ISharedMemoryImpl.h"
 
+// define added as given the following solution: https://answers.unrealengine.com/questions/813258/updated-to-420-now-i-cant-build-error-c4668.html
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <future>
 #include <sstream>
